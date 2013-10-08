@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -54,7 +55,7 @@ public class AlarmService extends Service {
 			
 			MediaPlayer player = mediaPlayer.get();
 			try {
-				AssetFileDescriptor openFd = getAssets().openFd("nyan.mp3");
+				AssetFileDescriptor openFd = getAssets().openFd("trolo.mp3");
 				FileDescriptor fd = openFd
 						.getFileDescriptor();
 				player.setDataSource(fd,openFd.getStartOffset(), openFd.getLength());
@@ -71,6 +72,14 @@ public class AlarmService extends Service {
 		stopForeground(true);
 		MediaPlayer old = mediaPlayer.getAndSet(null);
 		if (old != null) {
+
+			SharedPreferences settings = getSharedPreferences(
+					AlarmSetter.PREFS_NAME, 0);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putBoolean(AlarmSetter.ALARM_ENABLED, false);
+			// Commit the edits
+			editor.commit();
+
 			old.stop();
 			old.release();
 			stopSelf();
